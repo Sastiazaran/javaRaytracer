@@ -5,11 +5,11 @@
 package edu.up.isgc.raytracer;
 
 /**
- *
  * @author Jafet Rodríguez
  */
 public class Vector3D {
 
+    private static final double EPSILON = 1e-12;
     private static final Vector3D ZERO = new Vector3D(0.0, 0.0, 0.0);
     private double x, y, z;
 
@@ -43,35 +43,50 @@ public class Vector3D {
         setZ(z);
     }
 
-    public static double dotProduct(Vector3D vectorA, Vector3D vectorB){
+    public static double dotProduct(Vector3D vectorA, Vector3D vectorB) {
         return (vectorA.getX() * vectorB.getX()) + (vectorA.getY() * vectorB.getY()) + (vectorA.getZ() * vectorB.getZ());
     }
 
-    public static Vector3D crossProduct(Vector3D vectorA, Vector3D vectorB){
+    public static Vector3D crossProduct(Vector3D vectorA, Vector3D vectorB) {
         return new Vector3D((vectorA.getY() * vectorB.getZ()) - (vectorA.getZ() * vectorB.getY()),
                 (vectorA.getZ() * vectorB.getX()) - (vectorA.getX() * vectorB.getZ()),
                 (vectorA.getX() * vectorB.getY()) - (vectorA.getY() * vectorB.getX()));
     }
 
-    public static double magnitude(Vector3D vectorA){
-        return Math.sqrt(dotProduct(vectorA, vectorA));
+    public static double magnitude(Vector3D vectorA) {
+        return Math.sqrt(magnitudeSquared(vectorA));
     }
 
-    public static Vector3D add(Vector3D vectorA, Vector3D vectorB){
+    public static double magnitudeSquared(Vector3D vectorA) {
+        return dotProduct(vectorA, vectorA);
+    }
+
+    public static Vector3D add(Vector3D vectorA, Vector3D vectorB) {
         return new Vector3D(vectorA.getX() + vectorB.getX(), vectorA.getY() + vectorB.getY(), vectorA.getZ() + vectorB.getZ());
     }
 
-    public static Vector3D substract(Vector3D vectorA, Vector3D vectorB){
+    public static Vector3D substract(Vector3D vectorA, Vector3D vectorB) {
         return new Vector3D(vectorA.getX() - vectorB.getX(), vectorA.getY() - vectorB.getY(), vectorA.getZ() - vectorB.getZ());
     }
 
-    public static Vector3D normalize(Vector3D vectorA){
+    public static Vector3D normalize(Vector3D vectorA) {
         double mag = Vector3D.magnitude(vectorA);
+        if (mag < EPSILON) {
+            return ZERO();
+        }
         return new Vector3D(vectorA.getX() / mag, vectorA.getY() / mag, vectorA.getZ() / mag);
     }
-    
-    public static Vector3D scalarMultiplication(Vector3D vectorA, double scalar){
+
+    public static Vector3D scalarMultiplication(Vector3D vectorA, double scalar) {
         return new Vector3D(vectorA.getX() * scalar, vectorA.getY() * scalar, vectorA.getZ() * scalar);
+    }
+
+    /**
+     * Reflects incident vector I around N. Both should be normalized.
+     * R = I - 2 (I · N) N
+     */
+    public static Vector3D reflect(Vector3D incident, Vector3D normal) {
+        return substract(incident, scalarMultiplication(normal, 2.0 * dotProduct(incident, normal)));
     }
 
     @Override
@@ -79,11 +94,11 @@ public class Vector3D {
         return "(" + getX() + ", " + getY() + ", " + getZ() + ")";
     }
 
-    public Vector3D clone(){
+    public Vector3D clone() {
         return new Vector3D(getX(), getY(), getZ());
     }
 
-    public static Vector3D ZERO(){
+    public static Vector3D ZERO() {
         return ZERO.clone();
     }
 }
