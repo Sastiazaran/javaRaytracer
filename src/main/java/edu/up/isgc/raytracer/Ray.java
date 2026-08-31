@@ -5,7 +5,6 @@
 package edu.up.isgc.raytracer;
 
 /**
- *
  * @author Jafet Rodríguez
  */
 public class Ray {
@@ -27,10 +26,14 @@ public class Ray {
     }
 
     public Vector3D getDirection() {
-        return Vector3D.normalize(direction);
+        return direction;
     }
 
     public void setDirection(Vector3D direction) {
-        this.direction = direction;
+        this.direction = Vector3D.normalize(direction);
+    }
+
+    public Vector3D pointAt(double t) {
+        return Vector3D.add(origin, Vector3D.scalarMultiplication(direction, t));
     }
 }

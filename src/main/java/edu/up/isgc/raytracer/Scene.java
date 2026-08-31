@@ -11,7 +11,6 @@ import edu.up.isgc.raytracer.objects.Object3D;
 import java.util.ArrayList;
 
 /**
- *
  * @author Jafet Rodríguez
  */
 public class Scene {
@@ -20,7 +19,7 @@ public class Scene {
     private ArrayList<Object3D> objects;
     private ArrayList<Light> lights;
 
-    public Scene(){
+    public Scene() {
         setObjects(new ArrayList<Object3D>());
         setLights(new ArrayList<Light>());
     }
@@ -33,8 +32,10 @@ public class Scene {
         this.camera = camera;
     }
 
-    public void addObject(Object3D object){
-        getObjects().add(object);
+    public void addObject(Object3D object) {
+        if (object != null) {
+            getObjects().add(object);
+        }
     }
 
     public ArrayList<Object3D> getObjects() {
@@ -53,7 +54,9 @@ public class Scene {
         this.lights = lights;
     }
 
-    public void addLight(Light light){
-        getLights().add(light);
+    public void addLight(Light light) {
+        if (light != null) {
+            getLights().add(light);
+        }
     }
 }
