@@ -13,11 +13,11 @@ A Java raytracer originally written as a multimedia / computer graphics course p
 
 ## Renders
 
-Mirror and glass spheres on a checkerboard floor (2×2 AA):
+Mirror and glass spheres on a checkerboard floor (800×450, 3×3 AA):
 
 ![Spheres demo](renders/spheres.png)
 
-Teapot, ring, and cubes loaded from the included OBJ files:
+Teapot, ring, and cubes loaded from the included OBJ files (800×450, 2×2 AA):
 
 ![Teapot demo](renders/teapot.png)
 

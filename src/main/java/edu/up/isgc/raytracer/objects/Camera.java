@@ -19,6 +19,9 @@ public class Camera extends Object3D {
     private float defaultZ = 1f;
     private int[] resolution;
     private float[] nearFarPlanes = new float[2];
+    private Vector3D forward = new Vector3D(0, 0, 1);
+    private Vector3D right = new Vector3D(1, 0, 0);
+    private Vector3D up = new Vector3D(0, 1, 0);
 
     public Camera(Vector3D position, float fieldOfViewHorizontal, float fieldOfViewVertical, int widthResolution, int heightResolution, float nearPlane, float farPlane, Material material) {
         super(position, Color.black, material);
@@ -26,6 +29,19 @@ public class Camera extends Object3D {
         setFieldOfViewVertical(fieldOfViewVertical);
         setResolution(new int[]{widthResolution, heightResolution});
         setNearFarPlanes(new float[]{nearPlane, farPlane});
+    }
+
+    public Camera lookAt(Vector3D target) {
+        Vector3D direction = Vector3D.substract(target, getPosition());
+        Vector3D worldUp = new Vector3D(0, 1, 0);
+        this.forward = Vector3D.normalize(direction);
+        Vector3D rightVec = Vector3D.crossProduct(worldUp, this.forward);
+        if (Vector3D.magnitude(rightVec) < 1e-8) {
+            rightVec = new Vector3D(1, 0, 0);
+        }
+        this.right = Vector3D.normalize(rightVec);
+        this.up = Vector3D.normalize(Vector3D.crossProduct(this.forward, this.right));
+        return this;
     }
 
     public float[] getFieldOfView() {
@@ -94,7 +110,11 @@ public class Camera extends Object3D {
         double halfHeight = Math.tan(Math.toRadians(getFieldOfViewVertical() * 0.5)) * getDefaultZ();
         double x = (nx * 2.0 - 1.0) * halfWidth;
         double y = (1.0 - ny * 2.0) * halfHeight;
-        return new Ray(getPosition(), new Vector3D(x, y, getDefaultZ()));
+        Vector3D direction = Vector3D.add(
+                Vector3D.add(Vector3D.scalarMultiplication(right, x), Vector3D.scalarMultiplication(up, y)),
+                Vector3D.scalarMultiplication(forward, getDefaultZ())
+        );
+        return new Ray(getPosition(), direction);
     }
 
     public Vector3D[][] calculatePositionsToRay() {

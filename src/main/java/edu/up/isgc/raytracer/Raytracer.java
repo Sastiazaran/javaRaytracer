@@ -29,8 +29,9 @@ import java.util.stream.IntStream;
 public class Raytracer {
 
     private static final double EPSILON = 1e-4;
-    private static final Color SKY_ZENITH = new Color(88, 148, 228);
-    private static final Color SKY_HORIZON = new Color(232, 240, 255);
+    private static final double RAY_BIAS = 1e-3;
+    private static final Color SKY_ZENITH = new Color(48, 102, 188);
+    private static final Color SKY_HORIZON = new Color(244, 248, 255);
 
     public static void main(String[] args) {
         Options options = Options.parse(args);
@@ -186,12 +187,12 @@ public class Raytracer {
                     continue;
                 }
                 lightDir = Vector3D.scalarMultiplication(toLight, 1.0 / lightDistance);
-                attenuation = (float) (1.0 / (1.0 + lightDistance * lightDistance));
+                attenuation = (float) (1.0 / (1.0 + 0.22 * lightDistance + 0.06 * lightDistance * lightDistance));
             }
 
-            Vector3D shadowOrigin = Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(normal, EPSILON * 8));
-            double shadowTMax = Double.isInfinite(lightDistance) ? tMax : Math.max(EPSILON, lightDistance - EPSILON);
-            Intersection shadowHit = raycast(new Ray(shadowOrigin, lightDir), scene.getObjects(), EPSILON, shadowTMax);
+            Vector3D shadowOrigin = Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(lightDir, RAY_BIAS));
+            double shadowTMax = Double.isInfinite(lightDistance) ? tMax : Math.max(RAY_BIAS, lightDistance - RAY_BIAS);
+            Intersection shadowHit = raycast(new Ray(shadowOrigin, lightDir), scene.getObjects(), RAY_BIAS, shadowTMax);
             if (shadowHit != null) {
                 continue;
             }
@@ -220,22 +221,21 @@ public class Raytracer {
 
         if (depth < maxDepth && kr > 0) {
             Vector3D reflected = Vector3D.reflect(incident, normal);
-            Ray reflectRay = new Ray(Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(normal, EPSILON * 8)), reflected);
-            Color reflectedColor = trace(reflectRay, scene, depth + 1, maxDepth, EPSILON, tMax);
+            Ray reflectRay = new Ray(Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(reflected, RAY_BIAS)), reflected);
+            Color reflectedColor = trace(reflectRay, scene, depth + 1, maxDepth, RAY_BIAS, tMax);
             Colors.addScaled(rgb, Colors.from(reflectedColor), kr);
         }
 
         if (depth < maxDepth && kt > 0) {
             Vector3D refracted = refract(incident, geometricNormal, material.getIor());
             if (refracted != null) {
-                Vector3D offset = Vector3D.scalarMultiplication(normal, frontFace ? -EPSILON * 8 : EPSILON * 8);
-                Ray refractRay = new Ray(Vector3D.add(hit.getPosition(), offset), refracted);
-                Color refractedColor = trace(refractRay, scene, depth + 1, maxDepth, EPSILON, tMax);
+                Ray refractRay = new Ray(Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(refracted, RAY_BIAS)), refracted);
+                Color refractedColor = trace(refractRay, scene, depth + 1, maxDepth, RAY_BIAS, tMax);
                 Colors.addScaled(rgb, Colors.from(refractedColor), kt);
             } else {
                 Vector3D reflected = Vector3D.reflect(incident, normal);
-                Ray reflectRay = new Ray(Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(normal, EPSILON * 8)), reflected);
-                Color reflectedColor = trace(reflectRay, scene, depth + 1, maxDepth, EPSILON, tMax);
+                Ray reflectRay = new Ray(Vector3D.add(hit.getPosition(), Vector3D.scalarMultiplication(reflected, RAY_BIAS)), reflected);
+                Color reflectedColor = trace(reflectRay, scene, depth + 1, maxDepth, RAY_BIAS, tMax);
                 Colors.addScaled(rgb, Colors.from(reflectedColor), kt);
             }
         }

@@ -35,7 +35,18 @@ public class Plane extends Object3D {
         }
         int cx = (int) Math.floor(point.getX() / checkerScale);
         int cz = (int) Math.floor(point.getZ() / checkerScale);
-        return ((cx + cz) & 1) == 0 ? getColor() : secondaryColor;
+        Color checker = ((cx + cz) & 1) == 0 ? getColor() : secondaryColor;
+        double dist = Math.hypot(point.getX(), point.getZ());
+        double fade = Math.min(1.0, Math.max(0.0, (dist - 10.0) / 18.0));
+        if (fade <= 0) {
+            return checker;
+        }
+        Color average = new Color(
+                (getColor().getRed() + secondaryColor.getRed()) / 2,
+                (getColor().getGreen() + secondaryColor.getGreen()) / 2,
+                (getColor().getBlue() + secondaryColor.getBlue()) / 2
+        );
+        return edu.up.isgc.raytracer.Colors.lerp(checker, average, fade);
     }
 
     @Override
